@@ -85,3 +85,8 @@ li {
     justify-content: center;
 }
 
+
+.button {
+    display: flex;
+    
+}
