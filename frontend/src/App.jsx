@@ -8,6 +8,7 @@ function App() {
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [highestVolumeInfo, setHighestVolumeInfo] = useState(null);
+  const [currentState, setcurrentState] = useState('home')
 
   const fetchPrices = () => {
     if (!fromTime || !toTime) return;
@@ -15,6 +16,7 @@ function App() {
     const fromTimestamp = Math.floor(new Date(fromTime).getTime() / 1000);
     const toTimestamp = Math.floor(new Date(toTime).getTime() / 1000);
 
+    
     axios
       .get(
         `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range`,
@@ -80,7 +82,6 @@ function App() {
           <p><strong>Volume:</strong> €{highestVolumeInfo.volume.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
         </div>
       )}
-
       <ul>
         {bitcoin.map(([timestamp, price], index) => (
           <li key={index}>
@@ -88,6 +89,13 @@ function App() {
           </li>
         ))}
       </ul>
+
+      
+      if (currentState === 'bitcoin') {
+        return (
+
+        )
+      }
     </div>
   );
 }
