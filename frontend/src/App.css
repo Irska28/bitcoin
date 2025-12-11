@@ -70,12 +70,21 @@ button:hover {
   
 }
 
+
+
 .volume-info h3 {
   margin-top: 0;
   color: #333;
 }
 
 .volume-info p {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.max-info p {
   display: flex;
   justify-content: center;
   margin: 8px 0;
@@ -179,3 +188,12 @@ a {
 }
 
   
+
+.max-info {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  border: 2px solid #4CAF50;
+  
+}
