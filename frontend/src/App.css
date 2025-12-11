@@ -1,7 +1,6 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  /* keep top and horizontal padding, remove bottom padding so footer is flush */
   padding: 20px 20px 0 20px;
   background-color: #f0f8ff;
 }
@@ -22,7 +21,7 @@ h1 {
   max-width: 960px;
   width: 100%;
   padding: 0 20px;
-  flex: 1 0 auto; /* allow content to grow and push footer down */
+  flex: 1 0 auto; 
 }
 
 h3 {
@@ -116,16 +115,15 @@ li {
 
 .footer-container {
   position: relative;
-  margin-top: auto; /* stick to bottom of page when content is short */
-  /* make the colored bar span edge-to-edge while keeping page padding for content */
-  left: -20px; /* offset the body's horizontal padding */
-  width: calc(100% + 40px); /* expand to cover the full viewport width */
+  margin-top: auto;
+  left: -20px;
+  width: calc(100% + 40px); 
   display: flex;
   justify-content: center;
   align-items: center;
   background: linear-gradient(90deg, #ff3000 0%, #d93000 100%);
   color: #fff;
-  padding: 0; /* removed footer padding per request */
+  padding: 5px;
   height: 64px;
   box-shadow: 0 -8px 24px rgba(0,0,0,0.12);
   box-sizing: border-box;
@@ -134,9 +132,9 @@ li {
 .footer-inner {
   max-width: 960px;
   width: 100%;
-  padding: 0 20px; /* align inner content with page */
+  padding: 0 20px;
   display: flex;
-  flex-direction: column; /* stack items vertically */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 6px;
