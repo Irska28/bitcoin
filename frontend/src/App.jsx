@@ -1,38 +1,74 @@
 import { useState } from "react";
-import axios from "axios";
 import BitcoinChart from "./Chart";
 import "./App.css";
-
+import "./Downtrend"
 function App() {
   const [bitcoin, setBitcoin] = useState([]);
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
   const [highestVolumeInfo, setHighestVolumeInfo] = useState(null);
-  const [currentState, setcurrentState] = useState('home')
+  const [currentState, setcurrentState] = useState('home');
+  const [longestDownwardDays, setLongestDownwardDays] = useState(null);
+
+  const findLongestDownwardTrend = (prices) => {
+    if (!prices || prices.length === 0) return 0;
+
+    const dailyPrices = {};
+    prices.forEach(([timestamp, price]) => {
+      const date = new Date(timestamp).toISOString().split('T')[0];
+      if (!dailyPrices[date]) {
+        dailyPrices[date] = [];
+      }
+      dailyPrices[date].push(price);
+    });
+
+    const days = Object.keys(dailyPrices)
+      .sort()
+      .map(date => {
+        const pricesForDay = dailyPrices[date];
+        const avgPrice = pricesForDay.reduce((sum, p) => sum + p, 0) / pricesForDay.length;
+        return avgPrice;
+      });
+
+    let longestStreak = 0;
+    let currentStreak = 0;
+
+    for (let i = 1; i < days.length; i++) {
+      if (days[i] < days[i - 1]) {
+        currentStreak++;
+        if (currentStreak > longestStreak) {
+          longestStreak = currentStreak;
+        }
+      } else {
+        currentStreak = 0;
+
+      }
+    }
+
+    return longestStreak;
+  };
 
   const fetchPrices = () => {
     if (!fromTime || !toTime) return;
 
+    const today = new Date().toISOString().split('T')[0];
+    if (fromTime > today || toTime > today) {
+      alert("Cannot select future dates!");
+      return;
+    }
+
     const fromTimestamp = Math.floor(new Date(fromTime).getTime() / 1000);
     const toTimestamp = Math.floor(new Date(toTime).getTime() / 1000);
 
+    fetch(
+      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=eur&from=${fromTimestamp}&to=${toTimestamp}`
+    )
+      .then(res => res.json())
+      .then((data) => {
+        setBitcoin(data.prices);
 
-    axios
-      .get(
-        `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range`,
-        {
-          params: {
-            vs_currency: "eur",
-            from: fromTimestamp,
-            to: toTimestamp,
-          },
-        }
-      )
-      .then((res) => {
-        setBitcoin(res.data.prices);
-
-        if (res.data.total_volumes && res.data.total_volumes.length > 0) {
-          const maxVolume = res.data.total_volumes.reduce((max, current) =>
+        if (data.total_volumes && data.total_volumes.length > 0) {
+          const maxVolume = data.total_volumes.reduce((max, current) =>
             current[1] > max[1] ? current : max
           );
 
@@ -41,21 +77,26 @@ function App() {
             volume: maxVolume[1]
           });
         }
+
+        const downwardDays = findLongestDownwardTrend(data.prices);
+        setLongestDownwardDays(downwardDays);
       })
       .catch((err) => console.error(err));
   };
 
   return (
-    <div>
+    <div className="page">
+      <div className="container">
       <h1>Bitcoin Prices</h1>
-      <h3>The app will not work if the time is in the future</h3>
+
 
       <div className="dates">
         <label>
           From:
           <input
-            type="datetime-local"
+            type="date"
             value={fromTime}
+            max={new Date().toISOString().split('T')[0]}
             onChange={(e) => setFromTime(e.target.value)}
           />
         </label>
@@ -63,17 +104,31 @@ function App() {
         <label>
           To:
           <input
-            type="datetime-local"
+            type="date"
             value={toTime}
+            max={new Date().toISOString().split('T')[0]}
             onChange={(e) => setToTime(e.target.value)}
           />
         </label>
 
+
+      </div>
+      <div className="center">
         <button onClick={fetchPrices}>Get Prices</button>
       </div>
 
-
       {bitcoin.length > 0 && <BitcoinChart data={bitcoin} />}
+
+      {longestDownwardDays !== null && (
+        <div className="volume-info">
+          <h3>Longest Downward Trend</h3>
+          {longestDownwardDays === 0 ? (
+            <p>No downward trends during these dates.</p>
+          ) : (
+            <p><strong>Days:</strong> {longestDownwardDays}</p>
+          )}
+        </div>
+      )}
 
       {highestVolumeInfo && (
         <div className="volume-info">
@@ -82,11 +137,15 @@ function App() {
           <p><strong>Volume:</strong> €{highestVolumeInfo.volume.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
         </div>
       )}
+      <div className="center">
+        <button onClick={() => setcurrentState('bitcoin')} style={{ cursor: 'pointer' }}>All price changes</button>
+      </div>
 
-      <button onClick={() => setcurrentState('bitcoin')} style={{ cursor: 'pointer' }}>All price changes</button>
-      
       {currentState === 'bitcoin' && (
         <div>
+          <div className="center">
+            <button onClick={() => setcurrentState('home')} style={{ cursor: 'pointer', marginBottom: '10px' }}>Close price changes</button>
+          </div>
           <ul>
             {bitcoin.map(([timestamp, price], index) => (
               <li key={index}>
@@ -96,6 +155,16 @@ function App() {
           </ul>
         </div>
       )}
+
+
+      </div>
+
+      <footer className="footer-container">
+        <div className="footer-inner">
+          <h2>Scrooge McDuck´s bitcoin tracking software</h2>
+          <a href="https://www.investopedia.com/terms/b/bitcoin.asp">What is bitcoin?</a>
+        </div>
+      </footer>
 
     </div>
   );
