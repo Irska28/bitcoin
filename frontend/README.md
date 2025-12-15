@@ -1,16 +1,55 @@
-# React + Vite
+Bitcoin Price Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A frontend-only React application that fetches and visualizes Bitcoin price data using the CoinGecko API. The app allows users to select a date range and view price charts, statistics, and trading insights such as the best buy/sell days.
 
-Currently, two official plugins are available:
+Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+📈 Bitcoin price chart for a selected date range
 
-## React Compiler
+📅 Date range selection (past dates only)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🔻 Longest downward price trend (in days)
 
-## Expanding the ESLint configuration
+💰 Highest trading volume in the selected range
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+⬆️ Maximum Bitcoin price and date
+
+⬇️ Minimum Bitcoin price and date
+
+🔄 Best day to buy and best later day to sell for maximum profit
+
+🚫 Indicates when no profitable trade is possible
+
+📃 View all price changes as a list
+
+Technologies Used
+
+React (useState, functional components)
+
+JavaScript (ES6+)
+
+CoinGecko Public API
+
+CSS for styling
+
+How the App Works
+
+The user selects a from and to date.
+
+The app fetches Bitcoin price data from the CoinGecko API.
+
+Prices are displayed on a chart.
+
+The app calculates:
+
+Longest downward price trend
+
+Highest trading volume
+
+Minimum and maximum prices
+
+Best buy and sell days to maximize profit
+
+If prices only decrease, the app advises not to trade.
+
+All calculations are done on the client side — no backend is used.
