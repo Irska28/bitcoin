@@ -16,16 +16,15 @@ function App() {
   const [bestTrade, setBestTrade] = useState(null);
 
 
-  // Inside your component, before rendering the chart
+  
 const getLastPricePerDay = (prices) => {
   const dailyMap = {};
 
   prices.forEach(([timestamp, price]) => {
     const date = new Date(timestamp).toISOString().split('T')[0];
-    dailyMap[date] = [timestamp, price]; // always overwrite to get last price of the day
+    dailyMap[date] = [timestamp, price]; 
   });
 
-  // Convert map back to array sorted by date
   return Object.values(dailyMap).sort((a, b) => a[0] - b[0]);
 };
 
