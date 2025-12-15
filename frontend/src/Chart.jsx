@@ -11,10 +11,8 @@ function BitcoinChart({ data }) {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Chart padding
     const pad = { top: 40, right: 40, bottom: 50, left: 40 };
 
-    // Extract price values
     const prices = data.map(d => d[1]);
     const min = Math.min(...prices);
     const max = Math.max(...prices);
@@ -23,7 +21,6 @@ function BitcoinChart({ data }) {
     const chartW = width - pad.left - pad.right;
     const chartH = height - pad.top - pad.bottom;
 
-    // Precompute chart points
     const points = data.map(([, price], i) => {
       const x = pad.left + (chartW / (data.length - 1)) * i;
       const y = pad.top + chartH - ((price - min) / range) * chartH;
@@ -32,48 +29,43 @@ function BitcoinChart({ data }) {
 
     ctx.clearRect(0, 0, width, height);
 
-    // --- Background ---
+    // Background
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, width, height);
 
-    // --- Grid lines ---
+    // Grid lines
     ctx.strokeStyle = "#e0e0e0";
     ctx.lineWidth = 1;
     const steps = 5;
-
     for (let i = 0; i <= steps; i++) {
       const y = pad.top + (chartH / steps) * i;
-
       ctx.beginPath();
       ctx.moveTo(pad.left, y);
       ctx.lineTo(width - pad.right, y);
       ctx.stroke();
     }
 
-    // --- Price labels ---
+    // Price labels
     ctx.fillStyle = "#666";
     ctx.font = "12px Arial";
     ctx.textAlign = "right";
-
     for (let i = 0; i <= steps; i++) {
       const p = max - (range / steps) * i;
       const y = pad.top + (chartH / steps) * i;
       ctx.fillText(`€${p.toFixed(2)}`, pad.left - 8, y + 4);
     }
 
-    // --- X-axis date labels ---
+    // X-axis date labels
     ctx.textAlign = "center";
     const labelCount = 5;
     const step = Math.floor(data.length / labelCount);
-
     for (let i = 0; i < data.length; i += step) {
       const { x } = points[i];
       const date = new Date(data[i][0]).toLocaleDateString();
-
       ctx.fillText(date, x, height - pad.bottom + 20);
     }
 
-    // --- Gradient under curve ---
+    // Gradient under curve
     const gradient = ctx.createLinearGradient(0, pad.top, 0, height - pad.bottom);
     gradient.addColorStop(0, "rgba(255, 159, 64, 0.3)");
     gradient.addColorStop(1, "rgba(255, 159, 64, 0.05)");
@@ -86,22 +78,14 @@ function BitcoinChart({ data }) {
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    // --- Line stroke ---
+    // Line stroke
     ctx.beginPath();
     points.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
     ctx.strokeStyle = "rgb(255,159,64)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // --- Dots on points ---
-    points.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = "rgb(255,159,64)";
-      ctx.fill();
-    });
-
-    // --- Chart title ---
+    // Chart title
     ctx.fillStyle = "#333";
     ctx.font = "bold 16px Arial";
     ctx.fillText("Bitcoin Price (EUR)", width / 2, 25);
