@@ -13,6 +13,49 @@ function App() {
   const [maxPriceInfo, setMaxPriceInfo] = useState(null);
   const [minPriceInfo, setMinPriceInfo] = useState(null)
 
+  const [bestTrade, setBestTrade] = useState(null);
+
+
+
+  const findBestBuySellDays = (prices) => {
+    if (!prices || prices.length < 2) return null;
+
+    let minPrice = prices[0][1];
+    let minIndex = 0;
+
+    let maxProfit = 0;
+    let buyIndex = null;
+    let sellIndex = null;
+
+    for (let i = 1; i < prices.length; i++) {
+      const price = prices[i][1];
+
+      const profit = price - minPrice;
+      if (profit > maxProfit) {
+        maxProfit = profit;
+        buyIndex = minIndex;
+        sellIndex = i;
+      }
+
+      if (price < minPrice) {
+        minPrice = price;
+        minIndex = i;
+      }
+    }
+
+    if (maxProfit <= 0) {
+      return { shouldTrade: false };
+    }
+
+    return {
+      shouldTrade: true,
+      buy: prices[buyIndex],
+      sell: prices[sellIndex],
+      profit: maxProfit
+    };
+  };
+
+
 
   const findLongestDownwardTrend = (prices) => {
     if (!prices || prices.length === 0) return 0;
@@ -107,8 +150,12 @@ function App() {
             price: minPriceData[1]
           });
         }
+        
+
+        const trade = findBestBuySellDays(data.prices);
+        setBestTrade(trade);
+
       })
-      .catch((err) => console.error(err));
 
 
   };
@@ -184,6 +231,31 @@ function App() {
             <p><strong>Date: </strong> {minPriceInfo.date}</p>
           </div>
         )}
+
+        {bestTrade && (
+  <div className="volume-info">
+    <h3>Best Bitcoin Trade</h3>
+
+    {!bestTrade.shouldTrade ? (
+      <p>Price only decreases — do not buy or sell.</p>
+    ) : (
+      <>
+        <p>
+          <strong>Buy:</strong>{" "}
+          {new Date(bestTrade.buy[0]).toLocaleString()} (€{bestTrade.buy[1].toFixed(2)})
+        </p>
+        <p>
+          <strong>Sell:</strong>{" "}
+          {new Date(bestTrade.sell[0]).toLocaleString()} (€{bestTrade.sell[1].toFixed(2)})
+        </p>
+        <p>
+          <strong>Profit:</strong> €{bestTrade.profit.toFixed(2)}
+        </p>
+      </>
+    )}
+  </div>
+)}
+
         <div className="center">
           <button onClick={() => setcurrentState('bitcoin')} style={{ cursor: 'pointer' }}>All price changes</button>
         </div>
