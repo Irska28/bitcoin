@@ -12,7 +12,7 @@ function BitcoinChart({ data }) {
     const height = canvas.height;
 
     // Chart padding
-    const pad = { top: 40, right: 40, bottom: 50, left: 70 };
+    const pad = { top: 40, right: 40, bottom: 50, left: 40 };
 
     // Extract price values
     const prices = data.map(d => d[1]);
