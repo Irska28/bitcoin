@@ -237,7 +237,7 @@ function App() {
         {maxPriceInfo && (
           <div className="max-info">
             <h3>Max price</h3>
-            <p><strong>Max price:</strong> {maxPriceInfo.price}</p>
+            <p><strong>Max price:</strong> {maxPriceInfo.price.toFixed(2)}€</p>
             <p><strong>Date:</strong>{maxPriceInfo.date}</p>
           </div>
         )}
@@ -246,7 +246,7 @@ function App() {
         {minPriceInfo && (
           <div className="max-info">
             <h3>Min price</h3>
-            <p><strong>Min price: </strong> {minPriceInfo.price}</p>
+            <p><strong>Min price: </strong> {minPriceInfo.price.toFixed(2)}€</p>
             <p><strong>Date: </strong> {minPriceInfo.date}</p>
           </div>
         )}
