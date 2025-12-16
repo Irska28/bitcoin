@@ -16,13 +16,13 @@ function BitcoinChart({ data }) {
     const prices = data.map(d => d[1]);
     const min = Math.min(...prices);
     const max = Math.max(...prices);
-    const range = max - min;
+    const range = max - min || 1; // avoid division by zero
 
     const chartW = width - pad.left - pad.right;
     const chartH = height - pad.top - pad.bottom;
 
-    const points = data.map(([, price], i) => {
-      const x = pad.left + (chartW / (data.length - 1)) * i;
+    const points = data.map(([timestamp, price], i) => {
+      const x = pad.left + (chartW / (data.length - 1 || 1)) * i;
       const y = pad.top + chartH - ((price - min) / range) * chartH;
       return { x, y };
     });
@@ -57,12 +57,16 @@ function BitcoinChart({ data }) {
 
     // X-axis date labels
     ctx.textAlign = "center";
-    const labelCount = 5;
-    const step = Math.floor(data.length / labelCount);
+    const labelCount = Math.min(5, data.length);
+    const step = Math.max(1, Math.floor(data.length / labelCount));
+    let lastX = -Infinity;
+
     for (let i = 0; i < data.length; i += step) {
       const { x } = points[i];
+      if (x - lastX < 50) continue; // prevent overlapping
       const date = new Date(data[i][0]).toLocaleDateString();
       ctx.fillText(date, x, height - pad.bottom + 20);
+      lastX = x;
     }
 
     // Gradient under curve
