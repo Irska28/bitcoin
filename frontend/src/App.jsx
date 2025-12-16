@@ -16,19 +16,19 @@ function App() {
   const [bestTrade, setBestTrade] = useState(null);
 
 
-  
-const getLastPrice = (prices) => {
-  const dailyMap = {};
 
-  prices.forEach(([timestamp, price]) => {
-    const date = new Date(timestamp).toISOString().split('T')[0];
-    dailyMap[date] = [timestamp, price]; 
-  });
+  const getLastPrice = (prices) => {
+    const dailyMap = {};
 
-  return Object.values(dailyMap).sort((a, b) => a[0] - b[0]);
-};
+    prices.forEach(([timestamp, price]) => {
+      const date = new Date(timestamp).toISOString().split('T')[0];
+      dailyMap[date] = [timestamp, price];
+    });
 
-const lastPrices = getLastPrice(bitcoin);
+    return Object.values(dailyMap).sort((a, b) => a[0] - b[0]);
+  };
+
+  const lastPrices = getLastPrice(bitcoin);
 
 
 
@@ -112,68 +112,70 @@ const lastPrices = getLastPrice(bitcoin);
   };
 
   const fetchPrices = () => {
-  if (!fromTime || !toTime) return;
+    if (!fromTime || !toTime) return;
 
-  const today = new Date().toISOString().split("T")[0];
-  if (fromTime > today || toTime > today) {
-    alert("Cannot select future dates!");
-    return;
-  }
+    const today = new Date().toISOString().split("T")[0];
+    if (fromTime > today || toTime > today) {
+      alert("Cannot select future dates!");
+      return;
+    }
 
-  const fromTimestamp = Math.floor(new Date(fromTime).getTime() / 1000);
-  const toTimestamp = Math.floor(new Date(toTime).getTime() / 1000);
+    const fromTimestamp = Math.floor(new Date(fromTime).getTime() / 1000);
+    const toTimestamp = Math.floor(new Date(toTime).getTime() / 1000);
 
-  fetch(
-    `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=eur&from=${fromTimestamp}&to=${toTimestamp}`
-  )
-    .then(res => res.json())
-    .then(data => {
-      const prices = data.prices || [];
-      const volumes = data.total_volumes || [];
+    fetch(
+      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=eur&from=${fromTimestamp}&to=${toTimestamp}`
+    )
+      .then(res => res.json())
+      .then(data => {
+        const prices = data.prices || [];
+        const volumes = data.total_volumes || [];
 
-      const lastPrices = getLastPrice(prices);
-      setBitcoin(lastPrices);
+        const lastPrices = getLastPrice(prices);
+        setBitcoin(lastPrices);
 
-      if (volumes.length) {
-        const maxVolume = volumes.reduce((max, cur) =>
-          cur[1] > max[1] ? cur : max
-        );
+        if (volumes.length) {
+          const maxVolume = volumes.reduce((max, cur) =>
+            cur[1] > max[1] ? cur : max
+          );
 
-        setHighestVolumeInfo({
-          date: new Date(maxVolume[0]).toLocaleDateString(),
-          volume: maxVolume[1]
-        });
-      }
+          setHighestVolumeInfo({
+            date: new Date(maxVolume[0]).toLocaleDateString(),
+            volume: maxVolume[1]
+          });
+        }
 
-      const downwardDays = findLongestDownwardTrend(lastPrices);
-      setLongestDownwardDays(downwardDays);
+        const downwardDays = findLongestDownwardTrend(lastPrices);
+        setLongestDownwardDays(downwardDays);
 
-      if (lastPrices.length) {
-        const maxPriceData = lastPrices.reduce((max, cur) =>
-          cur[1] > max[1] ? cur : max
-        );
+        if (lastPrices.length) {
+          const maxPriceData = lastPrices.reduce((max, cur) =>
+            cur[1] > max[1] ? cur : max
+          );
 
-        setMaxPriceInfo({
-          date: new Date(maxPriceData[0]).toLocaleDateString(),
-          price: maxPriceData[1]
-        });
-      }
+          setMaxPriceInfo({
+            date: new Date(maxPriceData[0]).toLocaleDateString(),
+            price: maxPriceData[1]
+          });
+        }
 
-      if (lastPrices.length) {
-        const minPriceData = lastPrices.reduce((min, cur) =>
-          cur[1] < min[1] ? cur : min
-        );
+        // 🔹 Min price (daily last)
+        if (lastPrices.length) {
+          const minPriceData = lastPrices.reduce((min, cur) =>
+            cur[1] < min[1] ? cur : min
+          );
 
-        setMinPriceInfo({
-          date: new Date(minPriceData[0]).toLocaleDateString(),
-          price: minPriceData[1]
-        });
-      }
+          setMinPriceInfo({
+            date: new Date(minPriceData[0]).toLocaleDateString(),
+            price: minPriceData[1]
+          });
+        }
 
-      const trade = findBestBuySellDays(lastPrices);
-      setBestTrade(trade);
-    });
-};
+        // 🔹 Best trade (daily)
+        const trade = findBestBuySellDays(lastPrices);
+        setBestTrade(trade);
+      });
+  };
 
 
   return (
@@ -259,11 +261,11 @@ const lastPrices = getLastPrice(bitcoin);
       <>
         <p>
           <strong>Buy:</strong>{" "}
-          {new Date(bestTrade.buy[0]).toLocaleString()} (€{bestTrade.buy[1].toFixed(2)})
+          {new Date(bestTrade.buy[0]).toLocaleDateString()} (€{bestTrade.buy[1].toFixed(2)})
         </p>
         <p>
           <strong>Sell:</strong>{" "}
-          {new Date(bestTrade.sell[0]).toLocaleString()} (€{bestTrade.sell[1].toFixed(2)})
+          {new Date(bestTrade.sell[0]).toLocaleDateString()} (€{bestTrade.sell[1].toFixed(2)})
         </p>
         <p>
           <strong>Profit:</strong> €{bestTrade.profit.toFixed(2)}
@@ -285,7 +287,7 @@ const lastPrices = getLastPrice(bitcoin);
             <ul>
               {bitcoin.map(([timestamp, price], index) => (
                 <li key={index}>
-                  {new Date(timestamp).toLocaleString()} : €{price.toFixed(2)}
+                  {new Date(timestamp).toLocaleDateString()} : €{price.toFixed(2)}
                 </li>
               ))}
             </ul>
