@@ -16,19 +16,19 @@ function App() {
   const [bestTrade, setBestTrade] = useState(null);
 
 
+  
+const getLastPrice = (prices) => {
+  const dailyMap = {};
 
-  const getLastPrice = (prices) => {
-    const dailyMap = {};
+  prices.forEach(([timestamp, price]) => {
+    const date = new Date(timestamp).toISOString().split('T')[0];
+    dailyMap[date] = [timestamp, price]; 
+  });
 
-    prices.forEach(([timestamp, price]) => {
-      const date = new Date(timestamp).toISOString().split('T')[0];
-      dailyMap[date] = [timestamp, price];
-    });
+  return Object.values(dailyMap).sort((a, b) => a[0] - b[0]);
+};
 
-    return Object.values(dailyMap).sort((a, b) => a[0] - b[0]);
-  };
-
-  const lastPrices = getLastPrice(bitcoin);
+const lastPrices = getLastPrice(bitcoin);
 
 
 
@@ -112,69 +112,69 @@ function App() {
   };
 
   const fetchPrices = () => {
-    if (!fromTime || !toTime) return;
+  if (!fromTime || !toTime) return;
 
-    const today = new Date().toISOString().split('T')[0];
-    if (fromTime > today || toTime > today) {
-      alert("Cannot select future dates!");
-      return;
-    }
+  const today = new Date().toISOString().split("T")[0];
+  if (fromTime > today || toTime > today) {
+    alert("Cannot select future dates!");
+    return;
+  }
 
-    const fromTimestamp = Math.floor(new Date(fromTime).getTime() / 1000);
-    const toTimestamp = Math.floor(new Date(toTime).getTime() / 1000);
+  const fromTimestamp = Math.floor(new Date(fromTime).getTime() / 1000);
+  const toTimestamp = Math.floor(new Date(toTime).getTime() / 1000);
 
-    fetch(
-      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=eur&from=${fromTimestamp}&to=${toTimestamp}`
-    )
-      .then(res => res.json())
-      .then((data) => {
-        setBitcoin(data.prices);
+  fetch(
+    `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=eur&from=${fromTimestamp}&to=${toTimestamp}`
+  )
+    .then(res => res.json())
+    .then(data => {
+      const prices = data.prices || [];
+      const volumes = data.total_volumes || [];
 
-        if (data.total_volumes && data.total_volumes.length > 0) {
-          const maxVolume = data.total_volumes.reduce((max, current) =>
-            current[1] > max[1] ? current : max
-          );
+      const lastPrices = getLastPrice(prices);
+      setBitcoin(lastPrices);
 
-          setHighestVolumeInfo({
-            date: new Date(maxVolume[0]).toLocaleString(),
-            volume: maxVolume[1]
-          });
-        }
+      if (volumes.length) {
+        const maxVolume = volumes.reduce((max, cur) =>
+          cur[1] > max[1] ? cur : max
+        );
 
-        const downwardDays = findLongestDownwardTrend(data.prices);
-        setLongestDownwardDays(downwardDays);
+        setHighestVolumeInfo({
+          date: new Date(maxVolume[0]).toLocaleDateString(),
+          volume: maxVolume[1]
+        });
+      }
 
+      const downwardDays = findLongestDownwardTrend(lastPrices);
+      setLongestDownwardDays(downwardDays);
 
+      if (lastPrices.length) {
+        const maxPriceData = lastPrices.reduce((max, cur) =>
+          cur[1] > max[1] ? cur : max
+        );
 
-        if (data.prices && data.prices.length > 0) {
-          const maxPriceData = data.prices.reduce((max, current) =>
-            current[1] > max[1] ? current : max
-          );
-          setMaxPriceInfo({
-            date: new Date(maxPriceData[0]).toLocaleString(),
-            price: maxPriceData[1]
-          });
-        }
+        setMaxPriceInfo({
+          date: new Date(maxPriceData[0]).toLocaleDateString(),
+          price: maxPriceData[1]
+        });
+      }
 
+      if (lastPrices.length) {
+        const minPriceData = lastPrices.reduce((min, cur) =>
+          cur[1] < min[1] ? cur : min
+        );
 
-        if (data.prices && data.prices.length > 0) {
-          const minPriceData = data.prices.reduce((min, current) =>
-            current[1] < min[1] ? current : min
-          );
-          setMinPriceInfo({
-            date: new Date(minPriceData[0]).toLocaleString(),
-            price: minPriceData[1]
-          });
-        }
+        setMinPriceInfo({
+          date: new Date(minPriceData[0]).toLocaleDateString(),
+          price: minPriceData[1]
+        });
+      }
 
+      const trade = findBestBuySellDays(lastPrices);
+      setBestTrade(trade);
+    });
+};
 
-        const trade = findBestBuySellDays(data.prices);
-        setBestTrade(trade);
-
-      })
-
-
-  };
 
   return (
     <div className="page">
@@ -250,28 +250,28 @@ function App() {
         )}
 
         {bestTrade && (
-          <div className="volume-info">
-            <h3>Best Bitcoin Trade</h3>
+  <div className="volume-info">
+    <h3>Best Bitcoin Trade</h3>
 
-            {!bestTrade.shouldTrade ? (
-              <p>Price only decreases — do not buy or sell.</p>
-            ) : (
-              <>
-                <p>
-                  <strong>Buy:</strong>{" "}
-                  {new Date(bestTrade.buy[0]).toLocaleString()} (€{bestTrade.buy[1].toFixed(2)})
-                </p>
-                <p>
-                  <strong>Sell:</strong>{" "}
-                  {new Date(bestTrade.sell[0]).toLocaleString()} (€{bestTrade.sell[1].toFixed(2)})
-                </p>
-                <p>
-                  <strong>Profit:</strong> €{bestTrade.profit.toFixed(2)}
-                </p>
-              </>
-            )}
-          </div>
-        )}
+    {!bestTrade.shouldTrade ? (
+      <p>Price only decreases — do not buy or sell.</p>
+    ) : (
+      <>
+        <p>
+          <strong>Buy:</strong>{" "}
+          {new Date(bestTrade.buy[0]).toLocaleString()} (€{bestTrade.buy[1].toFixed(2)})
+        </p>
+        <p>
+          <strong>Sell:</strong>{" "}
+          {new Date(bestTrade.sell[0]).toLocaleString()} (€{bestTrade.sell[1].toFixed(2)})
+        </p>
+        <p>
+          <strong>Profit:</strong> €{bestTrade.profit.toFixed(2)}
+        </p>
+      </>
+    )}
+  </div>
+)}
 
         <div className="center">
           <button onClick={() => setcurrentState('bitcoin')} style={{ cursor: 'pointer' }}>All price changes</button>
