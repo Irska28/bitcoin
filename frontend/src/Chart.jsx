@@ -11,7 +11,7 @@ function BitcoinChart({ data }) {
     const width = canvas.width;
     const height = canvas.height;
 
-    const pad = { top: 40, right: 40, bottom: 50, left: 40 };
+    const pad = { top: 40, right: 40, bottom: 50, left: 70 };
 
     const prices = data.map(d => d[1]);
     const min = Math.min(...prices);
