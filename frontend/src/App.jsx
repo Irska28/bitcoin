@@ -159,7 +159,7 @@ function App() {
           });
         }
 
-        // 🔹 Min price (daily last)
+       
         if (lastPrices.length) {
           const minPriceData = lastPrices.reduce((min, cur) =>
             cur[1] < min[1] ? cur : min
@@ -171,7 +171,7 @@ function App() {
           });
         }
 
-        // 🔹 Best trade (daily)
+        
         const trade = findBestBuySellDays(lastPrices);
         setBestTrade(trade);
       });
